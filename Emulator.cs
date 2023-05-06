@@ -522,138 +522,222 @@ public class Emulator
 			case 0x88:
 				//NOTE(Simon): ADC B
 				AddWithCarryRegister(B);
-				return 1;
+				return 2;
 			case 0x89:
 				//NOTE(Simon): ADC C
 				AddWithCarryRegister(C);
-				return 1;
+				return 2;
 			case 0x8A:
 				//NOTE(Simon): ADC D
 				AddWithCarryRegister(D);
-				return 1;
+				return 2;
 			case 0x8B:
 				//NOTE(Simon): ADC E
 				AddWithCarryRegister(E);
-				return 1;
+				return 2;
 			case 0x8C:
 				//NOTE(Simon): ADC H
 				AddWithCarryRegister(H);
-				return 1;
+				return 2;
 			case 0x8D:
 				//NOTE(Simon): ADC L
 				AddWithCarryRegister(L);
-				return 1;
+				return 2;
 			case 0x8E:
 				throw new NotImplementedException();
 			case 0x8F:
 				//NOTE(Simon): ADC A
 				AddWithCarryRegister(A);
-				return 1;
+				return 2;
 			#endregion
 
 			#region 9x
 			case 0x90:
-				throw new NotImplementedException();
+				//NOTE(Simon): SUB, B
+				SubtractRegister(B);
+				return 1;
 			case 0x91:
-				throw new NotImplementedException();
+				//NOTE(Simon): SUB, C
+				SubtractRegister(C);
+				return 1;
 			case 0x92:
-				throw new NotImplementedException();
+				//NOTE(Simon): SUB, D
+				SubtractRegister(D);
+				return 1;
 			case 0x93:
-				throw new NotImplementedException();
+				//NOTE(Simon): SUB, E
+				SubtractRegister(E);
+				return 1;
 			case 0x94:
-				throw new NotImplementedException();
+				//NOTE(Simon): SUB, H
+				SubtractRegister(H);
+				return 1;
 			case 0x95:
-				throw new NotImplementedException();
+				//NOTE(Simon): SUB, L
+				SubtractRegister(L);
+				return 1;
 			case 0x96:
 				throw new NotImplementedException();
 			case 0x97:
-				throw new NotImplementedException();
+				//NOTE(Simon): SUB, A
+				SubtractRegister(A);
+				return 1;
 			case 0x98:
-				throw new NotImplementedException();
+				//NOTE(Simon): SBC, B
+				SubtractWithCarryRegister(B);
+				return 1;
 			case 0x99:
-				throw new NotImplementedException();
+				//NOTE(Simon): SBC, C
+				SubtractWithCarryRegister(C);
+				return 1;
 			case 0x9A:
-				throw new NotImplementedException();
+				//NOTE(Simon): SBC, D
+				SubtractWithCarryRegister(D);
+				return 1;
 			case 0x9B:
-				throw new NotImplementedException();
+				//NOTE(Simon): SBC, E
+				SubtractWithCarryRegister(E);
+				return 1;
 			case 0x9C:
-				throw new NotImplementedException();
+				//NOTE(Simon): SBC, H
+				SubtractWithCarryRegister(H);
+				return 1;
 			case 0x9D:
-				throw new NotImplementedException();
+				//NOTE(Simon): SBC, L
+				SubtractWithCarryRegister(L);
+				return 1;
 			case 0x9E:
 				throw new NotImplementedException();
 			case 0x9F:
-				throw new NotImplementedException();
+				//NOTE(Simon): SBC, A
+				SubtractWithCarryRegister(A);
+				return 1;
 			#endregion
 
 			#region Ax
 			case 0xA0:
-				throw new NotImplementedException();
+				//NOTE(Simon): AND B
+				AndRegister(B);
+				return 1;
 			case 0xA1:
-				throw new NotImplementedException();
+				//NOTE(Simon): AND C
+				AndRegister(C);
+				return 1;
 			case 0xA2:
-				throw new NotImplementedException();
+				//NOTE(Simon): AND D
+				AndRegister(D);
+				return 1;
 			case 0xA3:
-				throw new NotImplementedException();
+				//NOTE(Simon): AND E
+				AndRegister(E);
+				return 1;
 			case 0xA4:
-				throw new NotImplementedException();
+				//NOTE(Simon): AND H
+				AndRegister(H);
+				return 1;
 			case 0xA5:
-				throw new NotImplementedException();
+				//NOTE(Simon): AND L
+				AndRegister(L);
+				return 1;
 			case 0xA6:
 				throw new NotImplementedException();
 			case 0xA7:
-				throw new NotImplementedException();
+				//NOTE(Simon): AND A
+				AndRegister(A);
+				return 1;
 			case 0xA8:
-				throw new NotImplementedException();
+				//NOTE(Simon): XOR B
+				XorRegister(B);
+				return 1;
 			case 0xA9:
-				throw new NotImplementedException();
+				//NOTE(Simon): XOR C
+				XorRegister(C);
+				return 1;
 			case 0xAA:
-				throw new NotImplementedException();
+				//NOTE(Simon): XOR D
+				XorRegister(D);
+				return 1;
 			case 0xAB:
-				throw new NotImplementedException();
+				//NOTE(Simon): XOR E
+				XorRegister(E);
+				return 1;
 			case 0xAC:
-				throw new NotImplementedException();
+				//NOTE(Simon): XOR H
+				XorRegister(H);
+				return 1;
 			case 0xAD:
-				throw new NotImplementedException();
+				//NOTE(Simon): XOR L
+				XorRegister(L);
+				return 1;
 			case 0xAE:
 				throw new NotImplementedException();
 			case 0xAF:
-				throw new NotImplementedException();
+				//NOTE(Simon): XOR A
+				XorRegister(A);
+				return 1;
 			#endregion
 
 			#region Bx
 			case 0xB0:
-				throw new NotImplementedException();
+				//NOTE(Simon): OR B
+				OrRegister(B);
+				return 1;
 			case 0xB1:
-				throw new NotImplementedException();
+				//NOTE(Simon): OR C
+				OrRegister(C);
+				return 1;
 			case 0xB2:
-				throw new NotImplementedException();
+				//NOTE(Simon): OR D
+				OrRegister(D);
+				return 1;
 			case 0xB3:
-				throw new NotImplementedException();
+				//NOTE(Simon): OR E
+				OrRegister(E);
+				return 1;
 			case 0xB4:
-				throw new NotImplementedException();
+				//NOTE(Simon): OR H
+				OrRegister(H);
+				return 1;
 			case 0xB5:
-				throw new NotImplementedException();
+				//NOTE(Simon): OR L
+				OrRegister(L);
+				return 1;
 			case 0xB6:
 				throw new NotImplementedException();
 			case 0xB7:
-				throw new NotImplementedException();
+				//NOTE(Simon): OR A
+				OrRegister(A);
+				return 1;
 			case 0xB8:
-				throw new NotImplementedException();
+				//NOTE(Simon): CP B
+				CompareRegister(B);
+				return 1;
 			case 0xB9:
-				throw new NotImplementedException();
+				//NOTE(Simon): CP C
+				CompareRegister(C);
+				return 1;
 			case 0xBA:
-				throw new NotImplementedException();
+				//NOTE(Simon): CP D
+				CompareRegister(D);
+				return 1;
 			case 0xBB:
-				throw new NotImplementedException();
+				//NOTE(Simon): CP E
+				CompareRegister(E);
+				return 1;
 			case 0xBC:
-				throw new NotImplementedException();
+				//NOTE(Simon): CP H
+				CompareRegister(H);
+				return 1;
 			case 0xBD:
-				throw new NotImplementedException();
+				//NOTE(Simon): CP L
+				CompareRegister(L);
+				return 1;
 			case 0xBE:
 				throw new NotImplementedException();
 			case 0xBF:
-				throw new NotImplementedException();
+				//NOTE(Simon): CP A
+				CompareRegister(A);
+				return 1;
 			#endregion
 
 			#region Cx
@@ -816,16 +900,12 @@ public class Emulator
 
 	private void AddRegister(byte value)
 	{
-		bool halfCarry = (A & 0xF) + (value & 0xF) > 0xF;
-		SetFlagHalfCarry(halfCarry ? (byte)1 : (byte)0);
+		SetFlagSubtraction(0);
+		SetFlagHalfCarry((A & 0xF) + (value & 0xF) > 0xF ? 1 : 0);
+		SetFlagCarry(A + value > 0xFF ? 1 : 0);
 
-		bool carry = A + value > 0xFF;
-		SetFlagCarry(carry ? (byte)1 : (byte)0);
-
-		byte result = (byte)(A + value);
-
-		bool zero = result == 0;
-		SetFlagZero(zero ? (byte)1 : (byte)0);
+		A += value;
+		SetFlagZero(A == 0 ? 1 : 0);
 	}
 
 	private void AddWithCarryRegister(byte value)
@@ -833,38 +913,97 @@ public class Emulator
 		AddRegister((byte)(value + GetFlagCarry()));
 	}
 
-	private void SetFlagZero(byte value)
+	private void SubtractRegister(byte value)
+	{
+		SetFlagSubtraction(1);
+		SetFlagHalfCarry((value & 0xF) > (A & 0xF) ? 1 : 0);
+		SetFlagCarry(value > A ? 1 : 0);
+
+		A -= value;
+		SetFlagZero(A == 0 ? 1 : 0);
+	}
+
+	private void SubtractWithCarryRegister(byte value)
+	{
+		SubtractRegister((byte)(value + GetFlagCarry()));
+	}
+
+	private void AndRegister(byte value)
+	{
+		SetFlagSubtraction(0);
+		SetFlagHalfCarry(1);
+		SetFlagCarry(0);
+
+		A &= value;
+		SetFlagZero(A == 0 ? 1 : 0);
+	}
+
+	private void XorRegister(byte value)
+	{
+		SetFlagSubtraction(0);
+		SetFlagHalfCarry(0);
+		SetFlagCarry(0);
+
+		A ^= value;
+		SetFlagZero(A == 0 ? 1 : 0);
+	}
+
+	private void OrRegister(byte value)
+	{
+		SetFlagSubtraction(0);
+		SetFlagHalfCarry(0);
+		SetFlagCarry(0);
+
+		A |= value;
+		SetFlagZero(A == 0 ? 1 : 0);
+	}
+
+	private void CompareRegister(byte value)
+	{
+		SetFlagSubtraction(1);
+		SetFlagHalfCarry((value & 0xF) > (A & 0xF) ? 1 : 0);
+		SetFlagCarry(value > A ? 1 : 0);
+
+		int result = A - value;
+		SetFlagZero(result == 0 ? 1 : 0);
+	}
+
+	private void SetFlagZero(int value)
 	{
 		Debug.Assert(value <= 1);
+		Debug.Assert(value >= 0);
 
-		F = ModifyBit(F, 7, value);
+		F = ModifyBit(F, 7, (byte)value);
 	}
 
 	private byte GetFlagZero() => (byte)((F >> 7) & 1);
 
-	private void SetFlagSubtraction(byte value)
+	private void SetFlagSubtraction(int value)
 	{
 		Debug.Assert(value <= 1);
+		Debug.Assert(value >= 0);
 
-		F = ModifyBit(F, 6, value);
+		F = ModifyBit(F, 6, (byte)value);
 	}
 
 	private byte GetFlagSubtraction() => (byte)((F >> 6) & 1);
 
-	private void SetFlagHalfCarry(byte value)
+	private void SetFlagHalfCarry(int value)
 	{
 		Debug.Assert(value <= 1);
+		Debug.Assert(value >= 0);
 
-		F = ModifyBit(F, 5, value);
+		F = ModifyBit(F, 5, (byte)value);
 	}
 	
 	private byte GetFlagHalfCarry() => (byte)((F >> 5) & 1);
 
-	private void SetFlagCarry(byte value)
+	private void SetFlagCarry(int value)
 	{
 		Debug.Assert(value <= 1);
+		Debug.Assert(value >= 0);
 
-		F = ModifyBit(F, 4, value);
+		F = ModifyBit(F, 4, (byte)value);
 	}
 
 	private byte GetFlagCarry() => (byte)((F >> 4) & 1);
