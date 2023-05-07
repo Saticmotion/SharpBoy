@@ -10,7 +10,8 @@ public class Emulator
 
 	private byte[] memory = new byte[0x10000];
 
-	private byte[] backbuffer = new byte[256 * 256];
+	public byte[] screen = new byte[160 * 144 * 3];
+	private byte[] backbuffer = new byte[256 * 256 * 3];
 
 	private byte A;
 	private byte B;
@@ -62,6 +63,7 @@ public class Emulator
 
 	private ushort PC;
 
+	int i = 0;
 	public void LoadProgram(byte[] data)
 	{
 		Array.Copy(data, memory, 0x800);
@@ -78,6 +80,8 @@ public class Emulator
 			realCycles += cycles;
 		}
 
+		screen[i++] = 255;
+
 		return realCycles;
 	}
 
@@ -85,6 +89,7 @@ public class Emulator
 	private int SimulateNextOpcode()
 	{
 		byte opcode = memory[PC];
+		Console.WriteLine($"{opcode:X2}");
 		PC++;
 
 		switch (opcode)

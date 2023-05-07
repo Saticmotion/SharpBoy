@@ -34,10 +34,13 @@ public class Program
 		string path = @"C:\Users\Simon\Downloads\Tetris\Tetris.gb";
 		emulator.LoadProgram(ReadProgramFromDisk(path));
 
-		Raylib.InitWindow(physicalScreenWidth, physicalScreenHeight, "Hello Raylib!");
+		Raylib.SetConfigFlags(ConfigFlags.FLAG_WINDOW_RESIZABLE);
+		Raylib.InitWindow(physicalScreenWidth, physicalScreenHeight, "SharpBoy");
 		Raylib.SetTargetFPS(FPS);
 
-		var target = Raylib.LoadRenderTexture(64, 32);
+		var target = Raylib.LoadRenderTexture(Emulator.screenWidth, Emulator.screenHeight);
+		target.texture.format = PixelFormat.PIXELFORMAT_UNCOMPRESSED_R8G8B8;
+		Raylib.SetTextureWrap(target.texture, TextureWrap.TEXTURE_WRAP_CLAMP);
 		Raylib.SetTextureFilter(target.texture, TextureFilter.TEXTURE_FILTER_POINT);
 
 		float scale = Math.Min(Raylib.GetScreenWidth() / (float)Emulator.screenWidth, Raylib.GetScreenHeight() / (float)Emulator.screenHeight);
@@ -52,7 +55,13 @@ public class Program
 
 			Raylib.BeginTextureMode(target);
 			{
-				//Draw backbuffer
+				unsafe
+				{
+					fixed (void* p = emulator.screen)
+					{
+						Raylib.UpdateTexture(target.texture, p);
+					}
+				}
 			}
 			Raylib.EndTextureMode();
 
