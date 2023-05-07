@@ -795,7 +795,9 @@ public class Emulator
 			case 0xC2:
 				throw new NotImplementedException();
 			case 0xC3:
-				throw new NotImplementedException();
+				//NOTE(Simon): JP nn
+				JumpImmediate();
+				return 4;
 			case 0xC4:
 				throw new NotImplementedException();
 			case 0xC5:
@@ -877,7 +879,9 @@ public class Emulator
 			case 0xE8:
 				throw new NotImplementedException();
 			case 0xE9:
-				throw new NotImplementedException();
+				//NOTE(Simon): JP HL
+				JumpAddress(HL);
+				return 1;
 			case 0xEA:
 				throw new NotImplementedException();
 			case 0xEB:
@@ -1013,6 +1017,16 @@ public class Emulator
 
 		int result = A - value;
 		SetFlagZero(result == 0 ? 1 : 0);
+	}
+
+	private void JumpAddress(ushort address)
+	{
+		PC = address;
+	}
+
+	private void JumpImmediate()
+	{
+		JumpAddress(ReadImmediate());
 	}
 
 	private void SetFlagZero(int value)
