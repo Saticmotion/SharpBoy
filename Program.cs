@@ -43,7 +43,7 @@ public class Program
 		Raylib.SetTextureWrap(target.texture, TextureWrap.TEXTURE_WRAP_CLAMP);
 		Raylib.SetTextureFilter(target.texture, TextureFilter.TEXTURE_FILTER_POINT);
 
-		float scale = Math.Min(Raylib.GetScreenWidth() / (float)Emulator.screenWidth, Raylib.GetScreenHeight() / (float)Emulator.screenHeight);
+		float scale = CalculateTextureScale();
 
 		//NOTE(Simon): We lose some precision due to integer division. But at 60fps that works out to being 80ms slower per day of runtime
 		int cyclesPerFrame = 4 * mhz / 60;
@@ -52,6 +52,11 @@ public class Program
 		{
 			UpdateInput();
 			emulator.Simulate(input, cyclesPerFrame);
+
+			if (Raylib.IsWindowResized())
+			{
+				scale = CalculateTextureScale();
+			}
 
 			Raylib.BeginTextureMode(target);
 			{
@@ -100,6 +105,8 @@ public class Program
 			}
 		}
 	}
+
+	private static float CalculateTextureScale() => Math.Min(Raylib.GetScreenWidth() / (float)Emulator.screenWidth, Raylib.GetScreenHeight() / (float)Emulator.screenHeight);
 
 	public static byte[] ReadProgramFromDisk(string path)
 	{
