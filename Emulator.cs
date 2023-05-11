@@ -60,6 +60,7 @@ public class Emulator
 	}
 
 	private ushort StackPointer;
+	private bool IME = true;
 
 	private ushort PC;
 
@@ -68,11 +69,14 @@ public class Emulator
 	public Emulator()
 	{
 		PC = 0x100;
+
 		AF = 0x01B0;
 		BC = 0x0013;
 		DE = 0x00D8;
 		HL = 0x014D;
+
 		StackPointer = 0xFFFE;
+
 		memory[0xFF05] = 0x00;
 		memory[0xFF06] = 0x00;
 		memory[0xFF07] = 0x00;
@@ -142,7 +146,7 @@ public class Emulator
 				return 1;
 			case 0x01:
 				//NOTE(Simon): LD BC, nn
-				BC = ReadImmediate();
+				BC = ReadImmediate16();
 				return 3;
 			case 0x02:
 				//NOTE(Simon): LD (BC), A
@@ -153,9 +157,13 @@ public class Emulator
 			case 0x04:
 				throw new NotImplementedException();
 			case 0x05:
-				throw new NotImplementedException();
+				//NOTE(Simon): DEC, B
+				B = DecrementRegister(B);
+				return 1;
 			case 0x06:
-				throw new NotImplementedException();
+				//NOTE(Simon): LD B, n
+				B = LoadRegisterImmediate();
+				return 2;
 			case 0x07:
 				throw new NotImplementedException();
 			case 0x08:
@@ -169,9 +177,13 @@ public class Emulator
 			case 0x0C:
 				throw new NotImplementedException();
 			case 0x0D:
-				throw new NotImplementedException();
+				//NOTE(Simon): DEC, C
+				C = DecrementRegister(C);
+				return 1;
 			case 0x0E:
-				throw new NotImplementedException();
+				//NOTE(Simon): LD C, n
+				C = LoadRegisterImmediate();
+				return 2;
 			case 0x0F:
 				throw new NotImplementedException();
 			#endregion
@@ -179,7 +191,7 @@ public class Emulator
 			#region 1x
 			case 0x11:
 				//NOTE(Simon): LD DE, nn
-				DE = ReadImmediate();
+				DE = ReadImmediate16();
 				return 3;
 			case 0x12:
 				//NOTE(Simon): LD (DE), A
@@ -190,9 +202,13 @@ public class Emulator
 			case 0x14:
 				throw new NotImplementedException();
 			case 0x15:
-				throw new NotImplementedException();
+				//NOTE(Simon): DEC, D
+				D = DecrementRegister(D);
+				return 1;
 			case 0x16:
-				throw new NotImplementedException();
+				//NOTE(Simon): LD D, n
+				D = LoadRegisterImmediate();
+				return 2;
 			case 0x17:
 				throw new NotImplementedException();
 			case 0x18:
@@ -206,9 +222,13 @@ public class Emulator
 			case 0x1C:
 				throw new NotImplementedException();
 			case 0x1D:
-				throw new NotImplementedException();
+				//NOTE(Simon): DEC, E
+				E = DecrementRegister(E);
+				return 1;
 			case 0x1E:
-				throw new NotImplementedException();
+				//NOTE(Simon): LD E, n
+				E = LoadRegisterImmediate();
+				return 2;
 			case 0x1F:
 				throw new NotImplementedException();
 			#endregion
@@ -216,7 +236,7 @@ public class Emulator
 			#region 2x
 			case 0x21:
 				//NOTE(Simon): LD BC, nn
-				HL = ReadImmediate();
+				HL = ReadImmediate16();
 				return 3;
 			case 0x22:
 				throw new NotImplementedException();
@@ -225,9 +245,13 @@ public class Emulator
 			case 0x24:
 				throw new NotImplementedException();
 			case 0x25:
-				throw new NotImplementedException();
+				//NOTE(Simon): DEC, H
+				H = DecrementRegister(H);
+				return 1;
 			case 0x26:
-				throw new NotImplementedException();
+				//NOTE(Simon): LD H, n
+				H = LoadRegisterImmediate();
+				return 2;
 			case 0x27:
 				throw new NotImplementedException();
 			case 0x28:
@@ -241,9 +265,13 @@ public class Emulator
 			case 0x2C:
 				throw new NotImplementedException();
 			case 0x2D:
-				throw new NotImplementedException();
+				//NOTE(Simon): DEC, L
+				L = DecrementRegister(L);
+				return 1;
 			case 0x2E:
-				throw new NotImplementedException();
+				//NOTE(Simon): LD L, n
+				L = LoadRegisterImmediate();
+				return 2;
 			case 0x2F:
 				throw new NotImplementedException();
 			#endregion
@@ -251,10 +279,12 @@ public class Emulator
 			#region 3x
 			case 0x31:
 				//NOTE(Simon): LD BC, nn
-				StackPointer = ReadImmediate();
+				StackPointer = ReadImmediate16();
 				return 3;
 			case 0x32:
-				throw new NotImplementedException();
+				//NOTE(Simon): LD (HL-), A
+				LoadFromAccumulatorDecrement();
+				return 2;
 			case 0x33:
 				throw new NotImplementedException();
 			case 0x34:
@@ -276,11 +306,17 @@ public class Emulator
 			case 0x3C:
 				throw new NotImplementedException();
 			case 0x3D:
-				throw new NotImplementedException();
+				//NOTE(Simon): DEC, A
+				A = DecrementRegister(A);
+				return 1;
 			case 0x3E:
-				throw new NotImplementedException();
+				//NOTE(Simon): LD A, n
+				A = LoadRegisterImmediate();
+				return 2;
 			case 0x3F:
-				throw new NotImplementedException();
+				//NOTE(Simon): CCF
+				ComplementCarryFlag();
+				return 1;
 			#endregion
 
 			#region 4x
@@ -832,7 +868,8 @@ public class Emulator
 			case 0xD2:
 				throw new NotImplementedException();
 			case 0xD3:
-				throw new NotImplementedException();
+				//NOTE(Simon): No opcode
+				break;
 			case 0xD4:
 				throw new NotImplementedException();
 			case 0xD5:
@@ -848,11 +885,13 @@ public class Emulator
 			case 0xDA:
 				throw new NotImplementedException();
 			case 0xDB:
-				throw new NotImplementedException();
+				//NOTE(Simon): No opcode
+				break;
 			case 0xDC:
 				throw new NotImplementedException();
 			case 0xDD:
-				throw new NotImplementedException();
+				//NOTE(Simon): No opcode
+				break;
 			case 0xDE:
 				throw new NotImplementedException();
 			case 0xDF:
@@ -867,9 +906,11 @@ public class Emulator
 			case 0xE2:
 				throw new NotImplementedException();
 			case 0xE3:
-				throw new NotImplementedException();
+				//NOTE(Simon): No opcode
+				break;
 			case 0xE4:
-				throw new NotImplementedException();
+				//NOTE(Simon): No opcode
+				break;
 			case 0xE5:
 				throw new NotImplementedException();
 			case 0xE6:
@@ -885,11 +926,14 @@ public class Emulator
 			case 0xEA:
 				throw new NotImplementedException();
 			case 0xEB:
-				throw new NotImplementedException();
+				//NOTE(Simon): No opcode
+				break;
 			case 0xEC:
-				throw new NotImplementedException();
+				//NOTE(Simon): No opcode
+				break;
 			case 0xED:
-				throw new NotImplementedException();
+				//NOTE(Simon): No opcode
+				break;
 			case 0xEE:
 				throw new NotImplementedException();
 			case 0xEF:
@@ -904,9 +948,12 @@ public class Emulator
 			case 0xF2:
 				throw new NotImplementedException();
 			case 0xF3:
-				throw new NotImplementedException();
+				//NOTE(Simon): DI
+				IME = false;
+				return 1;
 			case 0xF4:
-				throw new NotImplementedException();
+				//NOTE(Simon): No opcode
+				break;
 			case 0xF5:
 				throw new NotImplementedException();
 			case 0xF6:
@@ -922,13 +969,17 @@ public class Emulator
 			case 0xFB:
 				throw new NotImplementedException();
 			case 0xFC:
-				throw new NotImplementedException();
+				//NOTE(Simon): No opcode
+				break;
 			case 0xFD:
-				throw new NotImplementedException();
+				//NOTE(Simon): No opcode
+				break;
 			case 0xFE:
 				throw new NotImplementedException();
 			case 0xFF:
-				throw new NotImplementedException();
+				//NOTE(Simon): RST, 38
+				Restart(0x38);
+				return 4;
 			#endregion
 		}
 
@@ -979,6 +1030,18 @@ public class Emulator
 		SubtractRegister((byte)(value + GetFlagCarry()));
 	}
 
+	private byte DecrementRegister(byte value)
+	{
+		SetFlagSubtraction(1);
+		SetFlagHalfCarry((value & 0xF) > (A & 0xF) ? 1 : 0);
+
+		value--;
+
+		SetFlagZero(value == 0 ? 1 : 0);
+
+		return value;
+	}
+
 	private void AndRegister(byte value)
 	{
 		SetFlagSubtraction(0);
@@ -1026,8 +1089,39 @@ public class Emulator
 
 	private void JumpImmediate()
 	{
-		JumpAddress(ReadImmediate());
+		JumpAddress(ReadImmediate16());
 	}
+
+	private void ComplementCarryFlag()
+	{
+		SetFlagCarry(1 - GetFlagCarry());
+		SetFlagHalfCarry(0);
+		SetFlagSubtraction(0);
+	}
+
+	private void Restart(byte rstAddress)
+	{
+		PushStack(PC);
+		PC = rstAddress;
+	}
+
+	private void PushStack(ushort value)
+	{
+		StackPointer--;
+		WriteMemory(StackPointer--, MSB(value));
+		WriteMemory(StackPointer, LSB(value));
+	}
+
+	private byte LoadRegisterImmediate()
+	{
+		return ReadImmediate8();
+	}
+
+	private void LoadFromAccumulatorDecrement()
+	{
+		WriteMemory(HL--, A);
+	}
+
 
 	private void SetFlagZero(int value)
 	{
@@ -1105,15 +1199,30 @@ public class Emulator
 
 	private ushort ReadMemory16(ushort address)
 	{
-		return (ushort)(memory[address] << 8 | memory[address + 1]);
+		return (ushort)(memory[address] | memory[address + 1] << 8);
 	}
 
 	//NOTE(Simon): Reads uint16 at PC. PC += 2
-	private ushort ReadImmediate()
+	private ushort ReadImmediate16()
 	{
 		ushort value = ReadMemory16(PC);
 		PC += 2;
 		return value;
+	}
+
+	private byte ReadImmediate8()
+	{
+		return ReadMemory(PC++);
+	}
+
+	private byte MSB(ushort value)
+	{
+		return (byte)(value >> 8);
+	}
+
+	private byte LSB(ushort value)
+	{
+		return (byte)value;
 	}
 
 	private void SimulateScreen(int cycles)

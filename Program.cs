@@ -32,6 +32,7 @@ public class Program
 	{
 		var emulator = new Emulator();
 		string path = @"C:\Users\Simon\Downloads\Tetris\Tetris.gb";
+		//string path = @"C:\Users\Simon\Downloads\DMGTestRoms\acceptance\instr\daa.gb";
 		emulator.LoadProgram(ReadProgramFromDisk(path));
 
 		Raylib.SetConfigFlags(ConfigFlags.FLAG_WINDOW_RESIZABLE);
