@@ -155,7 +155,9 @@ public class Emulator
 			case 0x03:
 				throw new NotImplementedException();
 			case 0x04:
-				throw new NotImplementedException();
+				//NOTE(Simon): INC, B
+				B = IncrementRegister(B);
+				return 1;
 			case 0x05:
 				//NOTE(Simon): DEC, B
 				B = DecrementRegister(B);
@@ -175,7 +177,9 @@ public class Emulator
 			case 0x0B:
 				throw new NotImplementedException();
 			case 0x0C:
-				throw new NotImplementedException();
+				//NOTE(Simon): INC, C
+				C = IncrementRegister(C);
+				return 1;
 			case 0x0D:
 				//NOTE(Simon): DEC, C
 				C = DecrementRegister(C);
@@ -200,7 +204,9 @@ public class Emulator
 			case 0x13:
 				throw new NotImplementedException();
 			case 0x14:
-				throw new NotImplementedException();
+				//NOTE(Simon): INC, D
+				D = IncrementRegister(D);
+				return 1;
 			case 0x15:
 				//NOTE(Simon): DEC, D
 				D = DecrementRegister(D);
@@ -220,7 +226,9 @@ public class Emulator
 			case 0x1B:
 				throw new NotImplementedException();
 			case 0x1C:
-				throw new NotImplementedException();
+				//NOTE(Simon): INC, E
+				E = IncrementRegister(E);
+				return 1;
 			case 0x1D:
 				//NOTE(Simon): DEC, E
 				E = DecrementRegister(E);
@@ -243,7 +251,9 @@ public class Emulator
 			case 0x23:
 				throw new NotImplementedException();
 			case 0x24:
-				throw new NotImplementedException();
+				//NOTE(Simon): INC, H
+				H = IncrementRegister(H);
+				return 1;
 			case 0x25:
 				//NOTE(Simon): DEC, H
 				H = DecrementRegister(H);
@@ -253,17 +263,23 @@ public class Emulator
 				H = LoadRegisterImmediate();
 				return 2;
 			case 0x27:
-				throw new NotImplementedException();
+				//NOTE(Simon): DAA
+				DecimalAdjustAccumulator();
+				return 1;
 			case 0x28:
 				throw new NotImplementedException();
 			case 0x29:
 				throw new NotImplementedException();
 			case 0x2A:
-				throw new NotImplementedException();
+				//NOTE(Simon): LD A, (HL+)
+				LoadAccumulatorIncrement();
+				return 2;
 			case 0x2B:
 				throw new NotImplementedException();
 			case 0x2C:
-				throw new NotImplementedException();
+				//NOTE(Simon): INC, L
+				L = IncrementRegister(L);
+				return 1;
 			case 0x2D:
 				//NOTE(Simon): DEC, L
 				L = DecrementRegister(L);
@@ -292,7 +308,9 @@ public class Emulator
 			case 0x35:
 				throw new NotImplementedException();
 			case 0x36:
-				throw new NotImplementedException();
+				//NOTE(Simon): LD (HL), n
+				LoadFromImmediate();
+				return 3;
 			case 0x37:
 				throw new NotImplementedException();
 			case 0x38:
@@ -304,7 +322,9 @@ public class Emulator
 			case 0x3B:
 				throw new NotImplementedException();
 			case 0x3C:
-				throw new NotImplementedException();
+				//NOTE(Simon): INC, A
+				A = IncrementRegister(A);
+				return 1;
 			case 0x3D:
 				//NOTE(Simon): DEC, A
 				A = DecrementRegister(A);
@@ -723,7 +743,9 @@ public class Emulator
 				AndRegister(L);
 				return 1;
 			case 0xA6:
-				throw new NotImplementedException();
+				//NOTE(Simon): AND (HL)
+				AndHL();
+				return 2;
 			case 0xA7:
 				//NOTE(Simon): AND A
 				AndRegister(A);
@@ -841,7 +863,9 @@ public class Emulator
 			case 0xC6:
 				throw new NotImplementedException();
 			case 0xC7:
-				throw new NotImplementedException();
+				//NOTE(Simon): RST, 00
+				Restart(0x00);
+				return 4;
 			case 0xC8:
 				throw new NotImplementedException();
 			case 0xC9:
@@ -853,11 +877,15 @@ public class Emulator
 			case 0xCC:
 				throw new NotImplementedException();
 			case 0xCD:
-				throw new NotImplementedException();
+				//NOTE(Simon): Call nn
+				CallFunctionImmediate();
+				return 6;
 			case 0xCE:
 				throw new NotImplementedException();
 			case 0xCF:
-				throw new NotImplementedException();
+				//NOTE(Simon): RST, 08
+				Restart(0x08);
+				return 4;
 			#endregion
 
 			#region Dx
@@ -869,6 +897,7 @@ public class Emulator
 				throw new NotImplementedException();
 			case 0xD3:
 				//NOTE(Simon): No opcode
+				Console.WriteLine($"Encountered unknown opcode {opcode:X}");
 				break;
 			case 0xD4:
 				throw new NotImplementedException();
@@ -877,7 +906,9 @@ public class Emulator
 			case 0xD6:
 				throw new NotImplementedException();
 			case 0xD7:
-				throw new NotImplementedException();
+				//NOTE(Simon): RST, 10
+				Restart(0x10);
+				return 4;
 			case 0xD8:
 				throw new NotImplementedException();
 			case 0xD9:
@@ -886,37 +917,49 @@ public class Emulator
 				throw new NotImplementedException();
 			case 0xDB:
 				//NOTE(Simon): No opcode
+				Console.WriteLine($"Encountered unknown opcode {opcode:X}");
 				break;
 			case 0xDC:
 				throw new NotImplementedException();
 			case 0xDD:
 				//NOTE(Simon): No opcode
+				Console.WriteLine($"Encountered unknown opcode {opcode:X}");
 				break;
 			case 0xDE:
 				throw new NotImplementedException();
 			case 0xDF:
-				throw new NotImplementedException();
+				//NOTE(Simon): RST, 18
+				Restart(0x18);
+				return 4;
 			#endregion
 
 			#region Ex
 			case 0xE0:
-				throw new NotImplementedException();
+				//NOTE(Simon): LDH (n), A
+				LoadFromAccumulatorImmediate();
+				return 3;
 			case 0xE1:
 				throw new NotImplementedException();
 			case 0xE2:
-				throw new NotImplementedException();
+				//NOTE(Simon): LDH (C), A
+				LoadFromAccumulator();
+				return 2;
 			case 0xE3:
 				//NOTE(Simon): No opcode
+				Console.WriteLine($"Encountered unknown opcode {opcode:X}");
 				break;
 			case 0xE4:
 				//NOTE(Simon): No opcode
+				Console.WriteLine($"Encountered unknown opcode {opcode:X}");
 				break;
 			case 0xE5:
 				throw new NotImplementedException();
 			case 0xE6:
 				throw new NotImplementedException();
 			case 0xE7:
-				throw new NotImplementedException();
+				//NOTE(Simon): RST, 20
+				Restart(0x20);
+				return 4;
 			case 0xE8:
 				throw new NotImplementedException();
 			case 0xE9:
@@ -924,25 +967,34 @@ public class Emulator
 				JumpAddress(HL);
 				return 1;
 			case 0xEA:
-				throw new NotImplementedException();
+				//NOTE(Simon): LD (nn), A
+				LoadFromAccumulator16();
+				return 4;
 			case 0xEB:
 				//NOTE(Simon): No opcode
+				Console.WriteLine($"Encountered unknown opcode {opcode:X}");
 				break;
 			case 0xEC:
 				//NOTE(Simon): No opcode
+				Console.WriteLine($"Encountered unknown opcode {opcode:X}");
 				break;
 			case 0xED:
 				//NOTE(Simon): No opcode
+				Console.WriteLine($"Encountered unknown opcode {opcode:X}");
 				break;
 			case 0xEE:
 				throw new NotImplementedException();
 			case 0xEF:
-				throw new NotImplementedException();
+				//NOTE(Simon): RST, 28
+				Restart(0x28);
+				return 4;
 			#endregion
 
 			#region Fx
 			case 0xF0:
-				throw new NotImplementedException();
+				//NOTE(Simon): LDH A, (n)
+				LoadAccumulator();
+				return 2;
 			case 0xF1:
 				throw new NotImplementedException();
 			case 0xF2:
@@ -953,29 +1005,40 @@ public class Emulator
 				return 1;
 			case 0xF4:
 				//NOTE(Simon): No opcode
+				Console.WriteLine($"Encountered unknown opcode {opcode:X}");
 				break;
 			case 0xF5:
 				throw new NotImplementedException();
 			case 0xF6:
 				throw new NotImplementedException();
 			case 0xF7:
-				throw new NotImplementedException();
+				//NOTE(Simon): RST, 30
+				Restart(0x30);
+				return 4;
 			case 0xF8:
 				throw new NotImplementedException();
 			case 0xF9:
-				throw new NotImplementedException();
+				//NOTE(Simon): LD SP, HL
+				StackPointer = HL;
+				return 2;
 			case 0xFA:
-				throw new NotImplementedException();
+				//NOTE(Simon): LD A, (nn)
+				LoadAccumulator16();
+				return 4;
 			case 0xFB:
 				throw new NotImplementedException();
 			case 0xFC:
 				//NOTE(Simon): No opcode
+				Console.WriteLine($"Encountered unknown opcode {opcode:X}");
 				break;
 			case 0xFD:
 				//NOTE(Simon): No opcode
+				Console.WriteLine($"Encountered unknown opcode {opcode:X}");
 				break;
 			case 0xFE:
-				throw new NotImplementedException();
+				//NOTE(Simon): CP n
+				CompareImmediate();
+				return 2;
 			case 0xFF:
 				//NOTE(Simon): RST, 38
 				Restart(0x38);
@@ -1033,11 +1096,23 @@ public class Emulator
 	private byte DecrementRegister(byte value)
 	{
 		SetFlagSubtraction(1);
-		SetFlagHalfCarry((value & 0xF) > (A & 0xF) ? 1 : 0);
+		SetFlagHalfCarry((value & 0xF) == 0 ? 1 : 0);
 
 		value--;
 
 		SetFlagZero(value == 0 ? 1 : 0);
+
+		return value;
+	}
+
+	private byte IncrementRegister(byte value)
+	{
+		SetFlagSubtraction(0);
+		SetFlagHalfCarry((value & 0xF) == 0xF ? 1 : 0);
+
+		value++;
+
+		SetFlagZero(A == 0 ? 1 : 0);
 
 		return value;
 	}
@@ -1049,6 +1124,17 @@ public class Emulator
 		SetFlagCarry(0);
 
 		A &= value;
+		SetFlagZero(A == 0 ? 1 : 0);
+	}
+
+	private void AndHL()
+	{
+
+		SetFlagSubtraction(0);
+		SetFlagHalfCarry(1);
+		SetFlagCarry(0);
+
+		A &= ReadMemory(HL);
 		SetFlagZero(A == 0 ? 1 : 0);
 	}
 
@@ -1105,22 +1191,104 @@ public class Emulator
 		PC = rstAddress;
 	}
 
-	private void PushStack(ushort value)
-	{
-		StackPointer--;
-		WriteMemory(StackPointer--, MSB(value));
-		WriteMemory(StackPointer, LSB(value));
-	}
-
 	private byte LoadRegisterImmediate()
 	{
 		return ReadImmediate8();
+	}
+
+	private void LoadFromImmediate()
+	{
+		ushort address = HL;
+		WriteMemory(address, ReadImmediate8());
+	}
+
+	private void LoadFromAccumulator()
+	{
+		ushort address = (ushort)(0xFF00 + C);
+		WriteMemory(address, A);
+	}
+
+	private void LoadFromAccumulatorImmediate()
+	{
+		ushort address = (ushort)(0xFF00 + ReadImmediate8());
+		WriteMemory(address, A);
+	}
+
+	private void LoadFromAccumulator16()
+	{
+		ushort address = ReadImmediate16();
+		WriteMemory(address, A);
 	}
 
 	private void LoadFromAccumulatorDecrement()
 	{
 		WriteMemory(HL--, A);
 	}
+
+	private void LoadAccumulator()
+	{
+		ushort address = (ushort)(0xFF00 + ReadImmediate8());
+		A = ReadMemory(address);
+	}
+
+	private void LoadAccumulator16()
+	{
+		ushort address = ReadImmediate16();
+		A = ReadMemory(address);
+	}
+
+	private void LoadAccumulatorIncrement()
+	{
+		A = ReadMemory(HL++);
+	}
+
+	private void CompareImmediate()
+	{
+		byte value = ReadImmediate8();
+
+		SetFlagSubtraction(1);
+		SetFlagHalfCarry((value & 0xF) > (A & 0xF) ? 1 : 0);
+		SetFlagCarry(value > A ? 1 : 0);
+
+		byte result = (byte)(A - value);
+
+		SetFlagZero(result == 0 ? 1 : 0);
+	}
+
+	//NOTE(Simon): Probably correct??
+	private void DecimalAdjustAccumulator()
+	{
+		byte value = A;
+
+		int msb = value & 0xF0;
+		int lsb = value & 0x0F;
+
+		if (msb > 9)
+		{
+			A += 0x60;
+		}
+
+		if (lsb > 9)
+		{
+			A += 0x06;
+			SetFlagCarry(1);
+		}
+		else
+		{
+			SetFlagCarry(0);
+		}
+
+		SetFlagZero(value == 0 ? 1 : 0);
+		SetFlagHalfCarry(0);
+	}
+
+	private void CallFunctionImmediate()
+	{
+		ushort address = ReadImmediate16();
+		PushStack(PC);
+		JumpAddress(address);
+	}
+
 
 
 	private void SetFlagZero(int value)
@@ -1162,6 +1330,17 @@ public class Emulator
 	}
 
 	private byte GetFlagCarry() => (byte)((F >> 4) & 1);
+
+
+
+	private void PushStack(ushort value)
+	{
+		StackPointer--;
+		WriteMemory(StackPointer--, MSB(value));
+		WriteMemory(StackPointer, LSB(value));
+	}
+
+
 
 	private static byte ModifyBit(byte original, byte position, byte value)
 	{
