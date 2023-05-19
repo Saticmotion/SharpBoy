@@ -135,7 +135,7 @@ public class Emulator
 	private int SimulateNextOpcode()
 	{
 		byte opcode = memory[PC];
-		Console.WriteLine($"{opcode:X2}");
+		Console.WriteLine($"{opcode:X2}, {PC:X}");
 		PC++;
 
 		switch (opcode)
@@ -242,6 +242,10 @@ public class Emulator
 			#endregion
 
 			#region 2x
+			case 0x20:
+				//NOTE(Simon): JR NZ, e
+				bool wasTrue = JumpRelativeConditional(GetFlagZero(), 0);
+				return wasTrue ? 3 : 2;
 			case 0x21:
 				//NOTE(Simon): LD BC, nn
 				HL = ReadImmediate16();
@@ -1044,6 +1048,9 @@ public class Emulator
 				Restart(0x38);
 				return 4;
 			#endregion
+
+			default:
+				throw new NotImplementedException();
 		}
 
 		return 0;
@@ -1176,6 +1183,23 @@ public class Emulator
 	private void JumpImmediate()
 	{
 		JumpAddress(ReadImmediate16());
+	}
+
+	private bool JumpRelativeConditional(byte value, byte testValue)
+	{
+		short offset = ReadImmediate8Signed();
+
+		if (value == testValue)
+		{
+			PC = (ushort)(PC + offset);
+			return true;
+		}
+		else
+		{
+			Debug.Assert(false);
+		}
+
+		return false;
 	}
 
 	private void ComplementCarryFlag()
@@ -1392,6 +1416,11 @@ public class Emulator
 	private byte ReadImmediate8()
 	{
 		return ReadMemory(PC++);
+	}
+
+	private short ReadImmediate8Signed()
+	{
+		return (short)(ReadMemory(PC++) - 256);
 	}
 
 	private byte MSB(ushort value)
