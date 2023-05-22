@@ -1,7 +1,6 @@
-﻿using System.Buffers.Binary;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 
-namespace ChipSharp;
+namespace SharpBoy;
 
 public class Emulator
 {
@@ -63,12 +62,22 @@ public class Emulator
 	private bool IME = true;
 
 	private ushort PC;
+	private int scanlineCounter;
+
+	//NOTE(Simon): Special memory registers
+	private const int LCDC = 0xFF40;
+	private const int STAT = 0xFF41;
+	private const int SCY = 0xFF42;
+	private const int SCX = 0xFF43;
+	private const int LY = 0xFF44;
+	private const int LYC = 0xFF45;
 
 	int i = 0;
 
 	public Emulator()
 	{
 		PC = 0x100;
+		scanlineCounter = 114;
 
 		AF = 0x01B0;
 		BC = 0x0013;
@@ -98,10 +107,10 @@ public class Emulator
 		memory[0xFF24] = 0x77;
 		memory[0xFF25] = 0xF3;
 		memory[0xFF26] = 0xF1;
-		memory[0xFF40] = 0x91;
-		memory[0xFF42] = 0x00;
-		memory[0xFF43] = 0x00;
-		memory[0xFF45] = 0x00;
+		memory[LCDC] = 0x91;
+		memory[SCY] = 0x00;
+		memory[SCX] = 0x00;
+		memory[LYC] = 0x00;
 		memory[0xFF47] = 0xFC;
 		memory[0xFF48] = 0xFF;
 		memory[0xFF49] = 0xFF;
@@ -131,11 +140,45 @@ public class Emulator
 		return realCycles;
 	}
 
+	private void SimulateScreen(int cycles)
+	{
+		//NOTE(Simon): If updating screen
+		if (GetBit(ReadMemory(LCDC), 7) != 1)
+		{
+			return;
+		}
+
+		scanlineCounter -= cycles;
+
+		if (scanlineCounter <= 0)
+		{
+			memory[LY]++;
+		}
+
+		int currentLine = memory[LY];
+
+		if (currentLine == 144)
+		{
+			//Interrupt
+		}
+
+		if (currentLine > 153)
+		{
+			memory[LY] = 0;
+		}
+
+		if (currentLine < 144)
+		{
+			//DrawScanline
+		}
+	}
+
 	//NOTE(Simon): Return cycles taken
 	private int SimulateNextOpcode()
 	{
 		byte opcode = memory[PC];
-		Console.WriteLine($"{opcode:X2}, {PC:X}");
+		Logger.WriteLine($"{opcode:X2}, {PC:X}");
+		Logger.WriteLine($"AF: {AF:X4}");
 		PC++;
 
 		switch (opcode)
@@ -193,6 +236,8 @@ public class Emulator
 			#endregion
 
 			#region 1x
+			case 0x10:
+				throw new NotImplementedException();
 			case 0x11:
 				//NOTE(Simon): LD DE, nn
 				DE = ReadImmediate16();
@@ -297,6 +342,8 @@ public class Emulator
 			#endregion
 
 			#region 3x
+			case 0x30:
+				throw new NotImplementedException();
 			case 0x31:
 				//NOTE(Simon): LD BC, nn
 				StackPointer = ReadImmediate16();
@@ -1196,7 +1243,7 @@ public class Emulator
 		}
 		else
 		{
-			Debug.Assert(false);
+			//Debug.Assert(false);
 		}
 
 		return false;
@@ -1234,7 +1281,8 @@ public class Emulator
 
 	private void LoadFromAccumulatorImmediate()
 	{
-		ushort address = (ushort)(0xFF00 + ReadImmediate8());
+		int offset = ReadImmediate8();
+		ushort address = (ushort)(0xFF00 + offset);
 		WriteMemory(address, A);
 	}
 
@@ -1323,7 +1371,10 @@ public class Emulator
 		F = ModifyBit(F, 7, (byte)value);
 	}
 
-	private byte GetFlagZero() => (byte)((F >> 7) & 1);
+	private byte GetFlagZero()
+	{
+		return GetBit(F, 7);
+	}
 
 	private void SetFlagSubtraction(int value)
 	{
@@ -1333,7 +1384,10 @@ public class Emulator
 		F = ModifyBit(F, 6, (byte)value);
 	}
 
-	private byte GetFlagSubtraction() => (byte)((F >> 6) & 1);
+	private byte GetFlagSubtraction()
+	{
+		return GetBit(F, 6);
+	}
 
 	private void SetFlagHalfCarry(int value)
 	{
@@ -1343,7 +1397,10 @@ public class Emulator
 		F = ModifyBit(F, 5, (byte)value);
 	}
 	
-	private byte GetFlagHalfCarry() => (byte)((F >> 5) & 1);
+	private byte GetFlagHalfCarry()
+	{
+		return GetBit(F, 5);
+	}
 
 	private void SetFlagCarry(int value)
 	{
@@ -1353,8 +1410,10 @@ public class Emulator
 		F = ModifyBit(F, 4, (byte)value);
 	}
 
-	private byte GetFlagCarry() => (byte)((F >> 4) & 1);
-
+	private byte GetFlagCarry()
+	{
+		return GetBit(F, 4);
+	}
 
 
 	private void PushStack(ushort value)
@@ -1373,6 +1432,11 @@ public class Emulator
 					((value << position) & mask));
 	}
 
+	private static byte GetBit(int value, int pos)
+	{
+		return (byte)((value >> pos) & 1);
+	}
+
 	private void WriteMemory(ushort address, byte value)
 	{
 		if (address < 0x8000)
@@ -1388,6 +1452,11 @@ public class Emulator
 		else if (address > 0xFEA0 && address < 0xFEFF)
 		{
 			//NOTE(Simon): Restricted, do nothing.
+		}
+		else if (address == LY)
+		{
+			//NOTE(Simon): Reset scanline register whenever it is written to
+			memory[LY] = 0;
 		}
 		else
 		{
@@ -1433,12 +1502,4 @@ public class Emulator
 		return (byte)value;
 	}
 
-	private void SimulateScreen(int cycles)
-	{
-		//Update scanline register @ FF44, every 456 cycles
-		//VBLANK interrupt at scanline 144
-		//If scanline > 153, scanline =  0
-
-		//Actually draw scanlines if < line 144
-	}
 }

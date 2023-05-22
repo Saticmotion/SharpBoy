@@ -1,8 +1,7 @@
-﻿using System.Diagnostics;
-using Raylib_cs;
+﻿using Raylib_cs;
 using System.Numerics;
 
-namespace ChipSharp;
+namespace SharpBoy;
 
 public class Program
 {
