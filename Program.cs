@@ -46,7 +46,7 @@ public class Program
 		float scale = CalculateTextureScale();
 
 		//NOTE(Simon): We lose some precision due to integer division. But at 60fps that works out to being 80ms slower per day of runtime
-		int cyclesPerFrame = 4 * mhz / 60;
+		int cyclesPerFrame = 1 * mhz / 60;
 
 		while (!Raylib.WindowShouldClose())
 		{
