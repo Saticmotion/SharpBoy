@@ -60,17 +60,20 @@ public class Emulator
 
 	private ushort StackPointer;
 	private bool IME = true;
+	private bool IMEScheduled = false;
 
 	private ushort PC;
 	private int scanlineCounter;
 
 	//NOTE(Simon): Special memory registers
+	private const int IF = 0xFF0F;
 	private const int LCDC = 0xFF40;
 	private const int STAT = 0xFF41;
 	private const int SCY = 0xFF42;
 	private const int SCX = 0xFF43;
 	private const int LY = 0xFF44;
 	private const int LYC = 0xFF45;
+	private const int IE = 0xFFFF;
 
 	int i = 0;
 
@@ -116,7 +119,7 @@ public class Emulator
 		memory[0xFF49] = 0xFF;
 		memory[0xFF4A] = 0x00;
 		memory[0xFF4B] = 0x00;
-		memory[0xFFFF] = 0x00;
+		memory[IE] = 0x00;
 	}
 
 	public void LoadProgram(byte[] data)
@@ -130,9 +133,18 @@ public class Emulator
 		int realCycles = 0;
 		while (realCycles < maxCycles)
 		{
-			int cycles = SimulateNextOpcode();
+			int cycles = HandleInterrupts();
+			cycles += SimulateNextOpcode();
 			SimulateScreen(cycles);
 			realCycles += cycles;
+
+			//NOTE(Simon): By this point we will have advanced PC by 2 instructions, but only 1 instruction has actually executed. (Hence PC - 2)
+			//NOTE(Simon): So at this point check if previous instruction was EI, and if so enable IME
+			if (IMEScheduled && memory[PC - 2] == 0xDF)
+			{
+				IME = true;
+				IMEScheduled = false;
+			}
 		}
 
 		screen[i++] = 255;
@@ -1077,7 +1089,9 @@ public class Emulator
 				LoadAccumulator16();
 				return 4;
 			case 0xFB:
-				throw new NotImplementedException();
+				//NOTE(Simon): EI
+				IMEScheduled = true;
+				return 1;
 			case 0xFC:
 				//NOTE(Simon): No opcode
 				Console.WriteLine($"Encountered unknown opcode {opcode:X}");
@@ -1109,12 +1123,73 @@ public class Emulator
 		byte opcode = memory[PC];
 		PC++;
 
+		throw new NotImplementedException();
 		switch (opcode)
 		{
-
 		}
 
 		return 0;
+	}
+
+	private int HandleInterrupts()
+	{
+		if (!IME)
+		{
+			return 0;
+		}
+
+		byte ifValue = ReadMemory(IF);
+		byte ieValue = ReadMemory(IE);
+
+		//NOTE(Simon): No interrupts (allowed) to be handled, so return immediately
+		if (ifValue == 0 || ieValue == 0)
+		{
+			return 0;
+		}
+
+		//NOTE(Simon): Handle VBLANK interrupt
+		if (GetBit(ifValue, 0) == 1 && GetBit(ieValue, 0) == 1)
+		{
+			ServiceInterrupt(0x40);
+			ModifyBit(memory[IF], 0, 0);
+		}
+		//NOTE(Simon): Handle STAT interrupt
+		else if (GetBit(ifValue, 1) == 1 && GetBit(ieValue, 1) == 1)
+		{
+			ServiceInterrupt(0x48);
+			ModifyBit(memory[IF], 1, 0);
+		}
+		//NOTE(Simon): Handle TIMER interrupt
+		else if (GetBit(ifValue, 2) == 1 && GetBit(ieValue, 2) == 1)
+		{
+			ServiceInterrupt(0x50);
+			ModifyBit(memory[IF], 2, 0);
+		}
+		//NOTE(Simon): Handle SERIAL interrupt
+		else if (GetBit(ifValue, 3) == 1 && GetBit(ieValue, 3) == 1)
+		{
+			ServiceInterrupt(0x58);
+			ModifyBit(memory[IF], 3, 0);
+		}
+		//NOTE(Simon): Handle JOYPAD interrupt
+		else if (GetBit(ifValue, 4) == 1 && GetBit(ieValue, 4) == 1)
+		{
+			ServiceInterrupt(0x60);
+			ModifyBit(memory[IF], 4, 0);
+		}
+		else
+		{
+			throw new InvalidOperationException();
+		}
+
+		return 5;
+	}
+
+	private void ServiceInterrupt(ushort address)
+	{
+		PushStack(PC);
+		PC = address;
+		IME = false;
 	}
 
 	private void AddRegister(byte value)
