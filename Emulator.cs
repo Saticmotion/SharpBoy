@@ -224,7 +224,7 @@ public class Emulator
 				return 1;
 			case 0x06:
 				//NOTE(Simon): LD B, n
-				B = LoadRegisterImmediate();
+				B = ReadImmediate8();
 				return 2;
 			case 0x07:
 				//NOTE(Simon): RLCA
@@ -256,7 +256,7 @@ public class Emulator
 				return 1;
 			case 0x0E:
 				//NOTE(Simon): LD C, n
-				C = LoadRegisterImmediate();
+				C = ReadImmediate8();
 				return 2;
 			case 0x0F:
 				//NOTE(Simon): RRCA
@@ -289,7 +289,7 @@ public class Emulator
 				return 1;
 			case 0x16:
 				//NOTE(Simon): LD D, n
-				D = LoadRegisterImmediate();
+				D = ReadImmediate8();
 				return 2;
 			case 0x17:
 				//NOTE(Simon): RLA
@@ -321,7 +321,7 @@ public class Emulator
 				return 1;
 			case 0x1E:
 				//NOTE(Simon): LD E, n
-				E = LoadRegisterImmediate();
+				E = ReadImmediate8();
 				return 2;
 			case 0x1F:
 				//NOTE(Simon): RRA
@@ -354,7 +354,7 @@ public class Emulator
 				return 1;
 			case 0x26:
 				//NOTE(Simon): LD H, n
-				H = LoadRegisterImmediate();
+				H = ReadImmediate8();
 				return 2;
 			case 0x27:
 				//NOTE(Simon): DAA
@@ -370,7 +370,7 @@ public class Emulator
 				return 2;
 			case 0x2A:
 				//NOTE(Simon): LD A, (HL+)
-				LoadAccumulatorIncrement();
+				A = LoadFromAddress(HL++);
 				return 2;
 			case 0x2B:
 				//NOTE(Simon): DEC HL
@@ -386,7 +386,7 @@ public class Emulator
 				return 1;
 			case 0x2E:
 				//NOTE(Simon): LD L, n
-				L = LoadRegisterImmediate();
+				L = ReadImmediate8();
 				return 2;
 			case 0x2F:
 				throw new NotImplementedException();
@@ -403,7 +403,7 @@ public class Emulator
 				return 3;
 			case 0x32:
 				//NOTE(Simon): LD (HL-), A
-				LoadFromAccumulatorDecrement();
+				WriteToAddress(HL--, A);
 				return 2;
 			case 0x33:
 				//NOTE(Simon): INC SP
@@ -415,7 +415,7 @@ public class Emulator
 				throw new NotImplementedException();
 			case 0x36:
 				//NOTE(Simon): LD (HL), n
-				LoadFromImmediate();
+				WriteToAddress(HL, ReadImmediate8());
 				return 3;
 			case 0x37:
 				throw new NotImplementedException();
@@ -445,7 +445,7 @@ public class Emulator
 				return 1;
 			case 0x3E:
 				//NOTE(Simon): LD A, n
-				A = LoadRegisterImmediate();
+				A = ReadImmediate8();
 				return 2;
 			case 0x3F:
 				//NOTE(Simon): CCF
@@ -1050,13 +1050,13 @@ public class Emulator
 			#region Ex
 			case 0xE0:
 				//NOTE(Simon): LDH (n), A
-				LoadFromAccumulatorImmediate();
+				WriteToAddressPart(ReadImmediate8(), A);
 				return 3;
 			case 0xE1:
 				throw new NotImplementedException();
 			case 0xE2:
 				//NOTE(Simon): LDH (C), A
-				LoadFromAccumulator();
+				WriteToAddressPart(C, A);
 				return 2;
 			case 0xE3:
 				//NOTE(Simon): No opcode
@@ -1082,7 +1082,7 @@ public class Emulator
 				return 1;
 			case 0xEA:
 				//NOTE(Simon): LD (nn), A
-				LoadFromAccumulator16();
+				WriteToAddress(ReadImmediate16(), A);
 				return 4;
 			case 0xEB:
 				//NOTE(Simon): No opcode
@@ -1107,7 +1107,7 @@ public class Emulator
 			#region Fx
 			case 0xF0:
 				//NOTE(Simon): LDH A, (n)
-				LoadAccumulator();
+				A = LoadFromAddressPart();
 				return 2;
 			case 0xF1:
 				throw new NotImplementedException();
@@ -1137,7 +1137,7 @@ public class Emulator
 				return 2;
 			case 0xFA:
 				//NOTE(Simon): LD A, (nn)
-				LoadAccumulator16();
+				A = LoadFromAddress(ReadImmediate16());
 				return 4;
 			case 0xFB:
 				//NOTE(Simon): EI
@@ -1469,56 +1469,31 @@ public class Emulator
 		PC = rstAddress;
 	}
 
-	private byte LoadRegisterImmediate()
+	private void WriteToAddressPart(byte addressPart, byte value)
 	{
-		return ReadImmediate8();
+		ushort address = (ushort)(0xFF00 + addressPart);
+		WriteMemory(address, value);
 	}
 
-	private void LoadFromImmediate()
+	private void WriteToAddress(ushort address, byte value)
 	{
-		ushort address = HL;
-		WriteMemory(address, ReadImmediate8());
+		WriteMemory(address, value);
 	}
 
-	private void LoadFromAccumulator()
+	private void WriteToAddress16(ushort address, ushort value)
 	{
-		ushort address = (ushort)(0xFF00 + C);
-		WriteMemory(address, A);
+		WriteMemory16(address, value);
 	}
 
-	private void LoadFromAccumulatorImmediate()
-	{
-		int offset = ReadImmediate8();
-		ushort address = (ushort)(0xFF00 + offset);
-		WriteMemory(address, A);
-	}
-
-	private void LoadFromAccumulator16()
-	{
-		ushort address = ReadImmediate16();
-		WriteMemory(address, A);
-	}
-
-	private void LoadFromAccumulatorDecrement()
-	{
-		WriteMemory(HL--, A);
-	}
-
-	private void LoadAccumulator()
+	private byte LoadFromAddressPart()
 	{
 		ushort address = (ushort)(0xFF00 + ReadImmediate8());
-		A = ReadMemory(address);
+		return ReadMemory(address);
 	}
 
-	private void LoadAccumulator16()
+	private byte LoadFromAddress(ushort address)
 	{
-		ushort address = ReadImmediate16();
-		A = ReadMemory(address);
-	}
-
-	private void LoadAccumulatorIncrement()
-	{
-		A = ReadMemory(HL++);
+		return ReadMemory(address);
 	}
 
 	private void CompareImmediate()
@@ -1643,6 +1618,12 @@ public class Emulator
 	private static byte GetBit(int value, int pos)
 	{
 		return (byte)((value >> pos) & 1);
+	}
+
+	private void WriteMemory16(ushort address, ushort value)
+	{
+		WriteMemory(address++, LSB(value));
+		WriteMemory(address, MSB(value));
 	}
 
 	private void WriteMemory(ushort address, byte value)
