@@ -193,9 +193,12 @@ public class Emulator
 		Logger.WriteLine($"AF: {AF:X4}");
 		PC++;
 
+		//NOTE(Simon): Needed for JR cc, e instructions. Can't be declared in each case scope
+		bool wasTrue;
+
 		switch (opcode)
 		{
-			#region 0x
+			#region 0x DONE
 			case 0x00:
 				//NOTE(Simon): NOP
 				return 1;
@@ -208,7 +211,9 @@ public class Emulator
 				WriteMemory(BC, A);
 				return 2;
 			case 0x03:
-				throw new NotImplementedException();
+				//NOTE(Simon): INC BC
+				BC = IncrementRegister16(BC);
+				return 2;
 			case 0x04:
 				//NOTE(Simon): INC, B
 				B = IncrementRegister(B);
@@ -222,15 +227,25 @@ public class Emulator
 				B = LoadRegisterImmediate();
 				return 2;
 			case 0x07:
-				throw new NotImplementedException();
+				//NOTE(Simon): RLCA
+				A = RotateLeftCarry(A);
+				return 1;
 			case 0x08:
-				throw new NotImplementedException();
+				//NOTE(Simon): LD(nn), SP
+				WriteToAddress16(ReadImmediate16(), StackPointer);
+				return 5;
 			case 0x09:
-				throw new NotImplementedException();
+				//NOTE(Simon): ADD HL, BC
+				AddHL(BC);
+				return 2;
 			case 0x0A:
-				throw new NotImplementedException();
+				//NOTE(Simon): LD A, (BC)
+				A = LoadFromAddress(BC);
+				return 2;
 			case 0x0B:
-				throw new NotImplementedException();
+				//NOTE(Simon): DEC BC
+				BC = DecrementRegister16(BC);
+				return 2;
 			case 0x0C:
 				//NOTE(Simon): INC, C
 				C = IncrementRegister(C);
@@ -244,7 +259,9 @@ public class Emulator
 				C = LoadRegisterImmediate();
 				return 2;
 			case 0x0F:
-				throw new NotImplementedException();
+				//NOTE(Simon): RRCA
+				A = RotateRightCarry(A);
+				return 1;
 			#endregion
 
 			#region 1x
@@ -259,7 +276,9 @@ public class Emulator
 				WriteMemory(DE, A);
 				return 2;
 			case 0x13:
-				throw new NotImplementedException();
+				//NOTE(Simon): INC DE
+				DE = IncrementRegister16(DE);
+				return 2;
 			case 0x14:
 				//NOTE(Simon): INC, D
 				D = IncrementRegister(D);
@@ -273,15 +292,25 @@ public class Emulator
 				D = LoadRegisterImmediate();
 				return 2;
 			case 0x17:
-				throw new NotImplementedException();
+				//NOTE(Simon): RLA
+				A = RotateLeftThroughCarry(A);
+				return 1;
 			case 0x18:
-				throw new NotImplementedException();
+				//NOTE(Simon): JR e
+				JumpRelative();
+				return 3;
 			case 0x19:
-				throw new NotImplementedException();
+				//NOTE(Simon): ADD HL, DE
+				AddHL(DE);
+				return 2;
 			case 0x1A:
-				throw new NotImplementedException();
+				//NOTE(Simon): LD A, (DE)
+				A = LoadFromAddress(DE);
+				return 2;
 			case 0x1B:
-				throw new NotImplementedException();
+				//NOTE(Simon): DEC DE
+				DE = DecrementRegister16(DE);
+				return 2;
 			case 0x1C:
 				//NOTE(Simon): INC, E
 				E = IncrementRegister(E);
@@ -295,13 +324,15 @@ public class Emulator
 				E = LoadRegisterImmediate();
 				return 2;
 			case 0x1F:
-				throw new NotImplementedException();
+				//NOTE(Simon): RRA
+				A = RotateRightThroughCarry(A);
+				return 1;
 			#endregion
 
 			#region 2x
 			case 0x20:
 				//NOTE(Simon): JR NZ, e
-				bool wasTrue = JumpRelativeConditional(GetFlagZero(), 0);
+				wasTrue = JumpRelativeConditional(GetFlagZero(), 0);
 				return wasTrue ? 3 : 2;
 			case 0x21:
 				//NOTE(Simon): LD BC, nn
@@ -310,7 +341,9 @@ public class Emulator
 			case 0x22:
 				throw new NotImplementedException();
 			case 0x23:
-				throw new NotImplementedException();
+				//NOTE(Simon): INC HL
+				HL = IncrementRegister16(HL);
+				return 2;
 			case 0x24:
 				//NOTE(Simon): INC, H
 				H = IncrementRegister(H);
@@ -328,15 +361,21 @@ public class Emulator
 				DecimalAdjustAccumulator();
 				return 1;
 			case 0x28:
-				throw new NotImplementedException();
+				//NOTE(Simon): JR Z, e
+				wasTrue = JumpRelativeConditional(GetFlagZero(), 1);
+				return wasTrue ? 3 : 2;
 			case 0x29:
-				throw new NotImplementedException();
+				//NOTE(Simon): ADD HL, HL
+				AddHL(HL);
+				return 2;
 			case 0x2A:
 				//NOTE(Simon): LD A, (HL+)
 				LoadAccumulatorIncrement();
 				return 2;
 			case 0x2B:
-				throw new NotImplementedException();
+				//NOTE(Simon): DEC HL
+				HL = DecrementRegister16(HL);
+				return 2;
 			case 0x2C:
 				//NOTE(Simon): INC, L
 				L = IncrementRegister(L);
@@ -355,7 +394,9 @@ public class Emulator
 
 			#region 3x
 			case 0x30:
-				throw new NotImplementedException();
+				//NOTE(Simon): JR NC, e
+				wasTrue = JumpRelativeConditional(GetFlagCarry(), 0);
+				return wasTrue ? 3 : 2;
 			case 0x31:
 				//NOTE(Simon): LD BC, nn
 				StackPointer = ReadImmediate16();
@@ -365,7 +406,9 @@ public class Emulator
 				LoadFromAccumulatorDecrement();
 				return 2;
 			case 0x33:
-				throw new NotImplementedException();
+				//NOTE(Simon): INC SP
+				StackPointer = IncrementRegister16(StackPointer);
+				return 2;
 			case 0x34:
 				throw new NotImplementedException();
 			case 0x35:
@@ -377,13 +420,21 @@ public class Emulator
 			case 0x37:
 				throw new NotImplementedException();
 			case 0x38:
-				throw new NotImplementedException();
+				//NOTE(Simon): JR C, e
+				wasTrue = JumpRelativeConditional(GetFlagCarry(), 1);
+				return wasTrue ? 3 : 2;
 			case 0x39:
-				throw new NotImplementedException();
+				//NOTE(Simon): ADD HL, SP
+				AddHL(StackPointer);
+				return 2;
 			case 0x3A:
-				throw new NotImplementedException();
+				//NOTE(Simon): LD A, (HL-)
+				A = LoadFromAddress(HL--);
+				return 2;
 			case 0x3B:
-				throw new NotImplementedException();
+				//NOTE(Simon): DEC SP
+				StackPointer = DecrementRegister16(StackPointer);
+				return 2;
 			case 0x3C:
 				//NOTE(Simon): INC, A
 				A = IncrementRegister(A);
@@ -1202,6 +1253,16 @@ public class Emulator
 		SetFlagZero(A == 0 ? 1 : 0);
 	}
 
+	//TODO(Simon): Verify HalfCarry flag
+	private void AddHL(ushort value)
+	{
+		SetFlagSubtraction(0);
+		SetFlagHalfCarry((HL & 0xF00) + (value & 0xF00) > 0xF00 ? 1 : 0);
+		SetFlagCarry(HL + value > 0xFFFF ? 1 : 0);
+
+		HL += value;
+	}
+
 	private void AddWithCarryRegister(byte value)
 	{
 		AddRegister((byte)(value + GetFlagCarry()));
@@ -1234,6 +1295,11 @@ public class Emulator
 		return value;
 	}
 
+	private ushort DecrementRegister16(ushort value)
+	{
+		return (ushort)(value - 1);
+	}
+
 	private byte IncrementRegister(byte value)
 	{
 		SetFlagSubtraction(0);
@@ -1242,6 +1308,73 @@ public class Emulator
 		value++;
 
 		SetFlagZero(A == 0 ? 1 : 0);
+
+		return value;
+	}
+
+	private ushort IncrementRegister16(ushort value)
+	{
+		return (ushort)(value + 1);
+	}
+
+	private byte RotateLeftCarry(byte value)
+	{
+		SetFlagSubtraction(0);
+		SetFlagHalfCarry(0);
+
+		byte bit7 = GetBit(value, 7);
+
+		value <<= 1;
+
+		SetFlagCarry(bit7);
+		SetFlagZero(value == 0 ? 1 : 0);
+
+		return value;
+	}
+
+	private byte RotateLeftThroughCarry(byte value)
+	{
+		SetFlagSubtraction(0);
+		SetFlagHalfCarry(0);
+
+		byte bit7 = GetBit(value, 7);
+
+		value <<= 1;
+
+		ModifyBit(value, 0, GetFlagCarry());
+		SetFlagCarry(bit7);
+		SetFlagZero(value == 0 ? 1 : 0);
+
+		return value;
+	}
+
+	private byte RotateRightCarry(byte value)
+	{
+		SetFlagSubtraction(0);
+		SetFlagHalfCarry(0);
+
+		byte bit0 = GetBit(value, 0);
+
+		value >>= 1;
+
+		SetFlagCarry(bit0);
+		SetFlagZero(value == 0 ? 1 : 0);
+
+		return value;
+	}
+
+	private byte RotateRightThroughCarry(byte value)
+	{
+		SetFlagSubtraction(0);
+		SetFlagHalfCarry(0);
+
+		byte bit0 = GetBit(value, 0);
+
+		value >>= 1;
+
+		ModifyBit(value, 7, GetFlagCarry());
+		SetFlagCarry(bit0);
+		SetFlagZero(value == 0 ? 1 : 0);
 
 		return value;
 	}
@@ -1258,7 +1391,6 @@ public class Emulator
 
 	private void AndHL()
 	{
-
 		SetFlagSubtraction(0);
 		SetFlagHalfCarry(1);
 		SetFlagCarry(0);
@@ -1309,19 +1441,19 @@ public class Emulator
 
 	private bool JumpRelativeConditional(byte value, byte testValue)
 	{
-		short offset = ReadImmediate8Signed();
-
 		if (value == testValue)
 		{
-			PC = (ushort)(PC + offset);
+			JumpRelative();
 			return true;
-		}
-		else
-		{
-			//Debug.Assert(false);
 		}
 
 		return false;
+	}
+
+	private void JumpRelative()
+	{
+		short offset = ReadImmediate8Signed();
+		PC = (ushort)(PC + offset);
 	}
 
 	private void ComplementCarryFlag()
@@ -1451,6 +1583,7 @@ public class Emulator
 		return GetBit(F, 7);
 	}
 
+	//NOTE(Simon): Also known as flag N
 	private void SetFlagSubtraction(int value)
 	{
 		Debug.Assert(value <= 1);
