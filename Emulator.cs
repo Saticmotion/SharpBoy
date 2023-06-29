@@ -329,7 +329,7 @@ public class Emulator
 				return 1;
 			#endregion
 
-			#region 2x
+			#region 2x DONE
 			case 0x20:
 				//NOTE(Simon): JR NZ, e
 				wasTrue = JumpRelativeConditional(GetFlagZero(), 0);
@@ -339,7 +339,9 @@ public class Emulator
 				HL = ReadImmediate16();
 				return 3;
 			case 0x22:
-				throw new NotImplementedException();
+				//NOTE(Simon): LD (HL+), A
+				WriteToAddress(HL++, A);
+				return 2;
 			case 0x23:
 				//NOTE(Simon): INC HL
 				HL = IncrementRegister16(HL);
@@ -389,10 +391,12 @@ public class Emulator
 				L = ReadImmediate8();
 				return 2;
 			case 0x2F:
-				throw new NotImplementedException();
+				//NOTE(Simon): CPL
+				ComplementAccumulator();
+				return 1;
 			#endregion
 
-			#region 3x
+			#region 3x DONE
 			case 0x30:
 				//NOTE(Simon): JR NC, e
 				wasTrue = JumpRelativeConditional(GetFlagCarry(), 0);
@@ -410,15 +414,22 @@ public class Emulator
 				StackPointer = IncrementRegister16(StackPointer);
 				return 2;
 			case 0x34:
-				throw new NotImplementedException();
+				//NOTE(Simon): INC (HL)
+				IncrementIndirect();
+				return 3;
 			case 0x35:
-				throw new NotImplementedException();
+				//NOTE(Simon): DEC (HL)
+				DecrementIndirect();
+				return 3;
 			case 0x36:
 				//NOTE(Simon): LD (HL), n
 				WriteToAddress(HL, ReadImmediate8());
 				return 3;
 			case 0x37:
-				throw new NotImplementedException();
+				//NOTE(Simon): SCF
+				//NOTE(Simon): Not to be confused with SetFlagCarry
+				SetCarryFlag();
+				return 1;
 			case 0x38:
 				//NOTE(Simon): JR C, e
 				wasTrue = JumpRelativeConditional(GetFlagCarry(), 1);
@@ -453,7 +464,7 @@ public class Emulator
 				return 1;
 			#endregion
 
-			#region 4x
+			#region 4x DONE
 			case 0x40:
 				//NOTE(Simon): LD B, B
 				B = B;
@@ -479,7 +490,9 @@ public class Emulator
 				B = L;
 				return 1;
 			case 0x46:
-				throw new NotImplementedException();
+				//NOTE(Simon): LD B, (HL)
+				B = LoadFromAddress(HL);
+				return 2;
 			case 0x47:
 				//NOTE(Simon): LD B, A
 				B = A;
@@ -509,14 +522,16 @@ public class Emulator
 				C = L;
 				return 1;
 			case 0x4E:
-				throw new NotImplementedException();
+				//NOTE(Simon): LD C, (HL)
+				C = LoadFromAddress(HL);
+				return 2;
 			case 0x4F:
 				//NOTE(Simon): LD C, A
 				C = A;
 				return 1;
 			#endregion
 
-			#region 5x
+			#region 5x DONE
 			case 0x50:
 				//NOTE(Simon): LD D, B
 				D = B;
@@ -542,7 +557,9 @@ public class Emulator
 				D = L;
 				return 1;
 			case 0x56:
-				throw new NotImplementedException();
+				//NOTE(Simon): LD D, (HL)
+				D = LoadFromAddress(HL);
+				return 2;
 			case 0x57:
 				//NOTE(Simon): LD D, A
 				D = A;
@@ -572,14 +589,16 @@ public class Emulator
 				E = L;
 				return 1;
 			case 0x5E:
-				throw new NotImplementedException();
+				//NOTE(Simon): LD E, (HL)
+				E = LoadFromAddress(HL);
+				return 2;
 			case 0x5F:
 				//NOTE(Simon): LD E, A
 				E = A;
 				return 1;
 			#endregion
 
-			#region 6x
+			#region 6x DONE
 			case 0x60:
 				//NOTE(Simon): LD H, B
 				H = B;
@@ -605,7 +624,9 @@ public class Emulator
 				H = L;
 				return 1;
 			case 0x66:
-				throw new NotImplementedException();
+				//NOTE(Simon): LD H, (HL)
+				H = LoadFromAddress(HL);
+				return 2;
 			case 0x67:
 				//NOTE(Simon): LD H, A
 				H = A;
@@ -635,7 +656,9 @@ public class Emulator
 				L = L;
 				return 1;
 			case 0x6E:
-				throw new NotImplementedException();
+				//NOTE(Simon): LD L, (HL)
+				L = LoadFromAddress(HL);
+				return 2;
 			case 0x6F:
 				//NOTE(Simon): LD L, A
 				L = A;
@@ -698,14 +721,16 @@ public class Emulator
 				A = L;
 				return 1;
 			case 0x7E:
-				throw new NotImplementedException();
+				//NOTE(Simon): LD A, (HL)
+				A = LoadFromAddress(HL);
+				return 2;
 			case 0x7F:
 				//NOTE(Simon): LD A, A
 				A = A;
 				return 1;
 			#endregion
 
-			#region 8x
+			#region 8x DONE
 			case 0x80:
 				//NOTE(Simon): ADD B
 				AddRegister(B);
@@ -731,7 +756,9 @@ public class Emulator
 				AddRegister(L);
 				return 1;
 			case 0x86:
-				throw new NotImplementedException();
+				//NOTE(Simon): ADD (HL)
+				AddRegisterIndirect();
+				return 2;
 			case 0x87:
 				//NOTE(Simon): ADD A
 				AddRegister(A);
@@ -761,14 +788,16 @@ public class Emulator
 				AddWithCarryRegister(L);
 				return 2;
 			case 0x8E:
-				throw new NotImplementedException();
+				//NOTE(Simon): ADC (HL)
+				AddWithCarryRegisterIndirect();
+				return 2;
 			case 0x8F:
 				//NOTE(Simon): ADC A
 				AddWithCarryRegister(A);
 				return 2;
 			#endregion
 
-			#region 9x
+			#region 9x DONE
 			case 0x90:
 				//NOTE(Simon): SUB, B
 				SubtractRegister(B);
@@ -794,7 +823,9 @@ public class Emulator
 				SubtractRegister(L);
 				return 1;
 			case 0x96:
-				throw new NotImplementedException();
+				//NOTE(Simon): SUB (HL)
+				SubtractRegisterIndirect();
+				return 2;
 			case 0x97:
 				//NOTE(Simon): SUB, A
 				SubtractRegister(A);
@@ -824,14 +855,16 @@ public class Emulator
 				SubtractWithCarryRegister(L);
 				return 1;
 			case 0x9E:
-				throw new NotImplementedException();
+				//NOTE(Simon): SBC (HL)
+				SubtractWithCarryRegisterIndirect();
+				return 2;
 			case 0x9F:
 				//NOTE(Simon): SBC, A
 				SubtractWithCarryRegister(A);
 				return 1;
 			#endregion
 
-			#region Ax
+			#region Ax DONE
 			case 0xA0:
 				//NOTE(Simon): AND B
 				AndRegister(B);
@@ -858,7 +891,7 @@ public class Emulator
 				return 1;
 			case 0xA6:
 				//NOTE(Simon): AND (HL)
-				AndHL();
+				AndIndirect();
 				return 2;
 			case 0xA7:
 				//NOTE(Simon): AND A
@@ -889,14 +922,16 @@ public class Emulator
 				XorRegister(L);
 				return 1;
 			case 0xAE:
-				throw new NotImplementedException();
+				//NOTE(Simon): XOR (HL)
+				XorIndirect();
+				return 2;
 			case 0xAF:
 				//NOTE(Simon): XOR A
 				XorRegister(A);
 				return 1;
 			#endregion
 
-			#region Bx
+			#region Bx DONE
 			case 0xB0:
 				//NOTE(Simon): OR B
 				OrRegister(B);
@@ -922,7 +957,9 @@ public class Emulator
 				OrRegister(L);
 				return 1;
 			case 0xB6:
-				throw new NotImplementedException();
+				//NOTE(Simon): OR (HL)
+				OrIndirect();
+				return 2;
 			case 0xB7:
 				//NOTE(Simon): OR A
 				OrRegister(A);
@@ -952,7 +989,9 @@ public class Emulator
 				CompareRegister(L);
 				return 1;
 			case 0xBE:
-				throw new NotImplementedException();
+				//NOTE(Simon): CP (HL)
+				CompareIndirect();
+				return 2;
 			case 0xBF:
 				//NOTE(Simon): CP A
 				CompareRegister(A);
@@ -1253,6 +1292,11 @@ public class Emulator
 		SetFlagZero(A == 0 ? 1 : 0);
 	}
 
+	private void AddRegisterIndirect()
+	{
+		AddRegister(ReadMemory(HL));
+	}
+
 	//TODO(Simon): Verify HalfCarry flag
 	private void AddHL(ushort value)
 	{
@@ -1263,9 +1307,19 @@ public class Emulator
 		HL += value;
 	}
 
+	private void AddWithCarryRegisterIndirect()
+	{
+		AddWithCarryRegister(ReadMemory(HL));
+	}
+
 	private void AddWithCarryRegister(byte value)
 	{
 		AddRegister((byte)(value + GetFlagCarry()));
+	}
+
+	private void SubtractRegisterIndirect()
+	{
+		SubtractRegister(ReadMemory(HL));
 	}
 
 	private void SubtractRegister(byte value)
@@ -1278,9 +1332,21 @@ public class Emulator
 		SetFlagZero(A == 0 ? 1 : 0);
 	}
 
+	private void SubtractWithCarryRegisterIndirect()
+	{
+		SubtractWithCarryRegister(ReadMemory(HL));
+	}
+
 	private void SubtractWithCarryRegister(byte value)
 	{
 		SubtractRegister((byte)(value + GetFlagCarry()));
+	}
+
+	private void DecrementIndirect()
+	{
+		byte value = ReadMemory(HL);
+		byte result = DecrementRegister(value);
+		WriteMemory(HL, result);
 	}
 
 	private byte DecrementRegister(byte value)
@@ -1298,6 +1364,13 @@ public class Emulator
 	private ushort DecrementRegister16(ushort value)
 	{
 		return (ushort)(value - 1);
+	}
+
+	private void IncrementIndirect()
+	{
+		byte value = ReadMemory(HL);
+		byte result = IncrementRegister(value);
+		WriteMemory(HL, result);
 	}
 
 	private byte IncrementRegister(byte value)
@@ -1389,14 +1462,9 @@ public class Emulator
 		SetFlagZero(A == 0 ? 1 : 0);
 	}
 
-	private void AndHL()
+	private void AndIndirect()
 	{
-		SetFlagSubtraction(0);
-		SetFlagHalfCarry(1);
-		SetFlagCarry(0);
-
-		A &= ReadMemory(HL);
-		SetFlagZero(A == 0 ? 1 : 0);
+		AndRegister(ReadMemory(HL));
 	}
 
 	private void XorRegister(byte value)
@@ -1409,6 +1477,11 @@ public class Emulator
 		SetFlagZero(A == 0 ? 1 : 0);
 	}
 
+	private void XorIndirect()
+	{
+		XorRegister(ReadMemory(HL));
+	}
+
 	private void OrRegister(byte value)
 	{
 		SetFlagSubtraction(0);
@@ -1419,6 +1492,11 @@ public class Emulator
 		SetFlagZero(A == 0 ? 1 : 0);
 	}
 
+	private void OrIndirect()
+	{
+		OrRegister(ReadMemory(HL));
+	}
+
 	private void CompareRegister(byte value)
 	{
 		SetFlagSubtraction(1);
@@ -1427,6 +1505,11 @@ public class Emulator
 
 		int result = A - value;
 		SetFlagZero(result == 0 ? 1 : 0);
+	}
+
+	private void CompareIndirect()
+	{
+		CompareRegister(ReadMemory(HL));
 	}
 
 	private void JumpAddress(ushort address)
@@ -1454,6 +1537,13 @@ public class Emulator
 	{
 		short offset = ReadImmediate8Signed();
 		PC = (ushort)(PC + offset);
+	}
+
+	private void ComplementAccumulator()
+	{
+		A = (byte)~A;
+		SetFlagHalfCarry(1);
+		SetFlagSubtraction(1);
 	}
 
 	private void ComplementCarryFlag()
@@ -1541,6 +1631,14 @@ public class Emulator
 		ushort address = ReadImmediate16();
 		PushStack(PC);
 		JumpAddress(address);
+	}
+
+	//NOTE(Simon): Not to be confused with SetFlagCarry
+	private void SetCarryFlag()
+	{
+		SetFlagSubtraction(0);
+		SetFlagHalfCarry(0);
+		SetFlagCarry(1);
 	}
 
 
