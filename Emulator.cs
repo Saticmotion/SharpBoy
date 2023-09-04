@@ -30,6 +30,7 @@ public class Emulator
 			F = (byte)value;
 		}
 	}
+
 	private ushort BC
 	{
 		get => (ushort)((B << 8) | C);
@@ -39,6 +40,7 @@ public class Emulator
 			C = (byte)value;
 		}
 	}
+
 	private ushort DE
 	{
 		get => (ushort)((D << 8) | E);
@@ -48,6 +50,7 @@ public class Emulator
 			E = (byte)value;
 		}
 	}
+
 	private ushort HL
 	{
 		get => (ushort)((H << 8) | L);
@@ -199,6 +202,7 @@ public class Emulator
 		switch (opcode)
 		{
 			#region 0x DONE
+
 			case 0x00:
 				//NOTE(Simon): NOP
 				return 1;
@@ -262,9 +266,11 @@ public class Emulator
 				//NOTE(Simon): RRCA
 				A = RotateRightCarry(A);
 				return 1;
+
 			#endregion
 
 			#region 1x
+
 			case 0x10:
 				throw new NotImplementedException();
 			case 0x11:
@@ -327,9 +333,11 @@ public class Emulator
 				//NOTE(Simon): RRA
 				A = RotateRightThroughCarry(A);
 				return 1;
+
 			#endregion
 
 			#region 2x DONE
+
 			case 0x20:
 				//NOTE(Simon): JR NZ, e
 				wasTrue = JumpRelativeConditional(GetFlagZero(), 0);
@@ -394,9 +402,11 @@ public class Emulator
 				//NOTE(Simon): CPL
 				ComplementAccumulator();
 				return 1;
+
 			#endregion
 
 			#region 3x DONE
+
 			case 0x30:
 				//NOTE(Simon): JR NC, e
 				wasTrue = JumpRelativeConditional(GetFlagCarry(), 0);
@@ -462,9 +472,11 @@ public class Emulator
 				//NOTE(Simon): CCF
 				ComplementCarryFlag();
 				return 1;
+
 			#endregion
 
 			#region 4x DONE
+
 			case 0x40:
 				//NOTE(Simon): LD B, B
 				B = B;
@@ -529,9 +541,11 @@ public class Emulator
 				//NOTE(Simon): LD C, A
 				C = A;
 				return 1;
+
 			#endregion
 
 			#region 5x DONE
+
 			case 0x50:
 				//NOTE(Simon): LD D, B
 				D = B;
@@ -596,9 +610,11 @@ public class Emulator
 				//NOTE(Simon): LD E, A
 				E = A;
 				return 1;
+
 			#endregion
 
 			#region 6x DONE
+
 			case 0x60:
 				//NOTE(Simon): LD H, B
 				H = B;
@@ -663,9 +679,11 @@ public class Emulator
 				//NOTE(Simon): LD L, A
 				L = A;
 				return 1;
+
 			#endregion
 
 			#region 7x
+
 			case 0x70:
 				//NOTE(Simon): LD (HL), B
 				WriteMemory(HL, B);
@@ -728,9 +746,11 @@ public class Emulator
 				//NOTE(Simon): LD A, A
 				A = A;
 				return 1;
+
 			#endregion
 
 			#region 8x DONE
+
 			case 0x80:
 				//NOTE(Simon): ADD B
 				AddRegister(B);
@@ -795,9 +815,11 @@ public class Emulator
 				//NOTE(Simon): ADC A
 				AddWithCarryRegister(A);
 				return 2;
+
 			#endregion
 
 			#region 9x DONE
+
 			case 0x90:
 				//NOTE(Simon): SUB, B
 				SubtractRegister(B);
@@ -862,9 +884,11 @@ public class Emulator
 				//NOTE(Simon): SBC, A
 				SubtractWithCarryRegister(A);
 				return 1;
+
 			#endregion
 
 			#region Ax DONE
+
 			case 0xA0:
 				//NOTE(Simon): AND B
 				AndRegister(B);
@@ -929,9 +953,11 @@ public class Emulator
 				//NOTE(Simon): XOR A
 				XorRegister(A);
 				return 1;
+
 			#endregion
 
 			#region Bx DONE
+
 			case 0xB0:
 				//NOTE(Simon): OR B
 				OrRegister(B);
@@ -996,15 +1022,23 @@ public class Emulator
 				//NOTE(Simon): CP A
 				CompareRegister(A);
 				return 1;
+
 			#endregion
 
 			#region Cx
+
 			case 0xC0:
-				throw new NotImplementedException();
+				//NOTE(Simon): RET NZ
+				wasTrue = ReturnConditional(GetFlagZero(), 0);
+				return wasTrue ? 5 : 2;
 			case 0xC1:
-				throw new NotImplementedException();
+				//NOTE(Simon): POP BC
+				BC = PopStack();
+				return 3;
 			case 0xC2:
-				throw new NotImplementedException();
+				//NOTE(Simon): JP NZ, nn
+				wasTrue = JumpConditional(GetFlagZero(), 0);
+				return wasTrue ? 4 : 3;
 			case 0xC3:
 				//NOTE(Simon): JP nn
 				JumpImmediate();
@@ -1012,7 +1046,9 @@ public class Emulator
 			case 0xC4:
 				throw new NotImplementedException();
 			case 0xC5:
-				throw new NotImplementedException();
+				//NOTE(Simon): PUSH BC
+				PushStack(BC);
+				return 4;
 			case 0xC6:
 				throw new NotImplementedException();
 			case 0xC7:
@@ -1020,11 +1056,17 @@ public class Emulator
 				Restart(0x00);
 				return 4;
 			case 0xC8:
-				throw new NotImplementedException();
+				//NOTE(Simon): RET Z
+				wasTrue = ReturnConditional(GetFlagZero(), 1);
+				return wasTrue ? 5 : 2;
 			case 0xC9:
-				throw new NotImplementedException();
+				//NOTE(Simon): RET
+				Return();
+				return 4;
 			case 0xCA:
-				throw new NotImplementedException();
+				//NOTE(Simon): JP Z, nn
+				wasTrue = JumpConditional(GetFlagZero(), 1);
+				return wasTrue ? 4 : 3;
 			case 0xCB:
 				return SimulateExtendedOpcodes();
 			case 0xCC:
@@ -1039,15 +1081,23 @@ public class Emulator
 				//NOTE(Simon): RST, 08
 				Restart(0x08);
 				return 4;
+
 			#endregion
 
 			#region Dx
+
 			case 0xD0:
-				throw new NotImplementedException();
+				//NOTE(Simon): RET NC
+				wasTrue = ReturnConditional(GetFlagCarry(), 0);
+				return wasTrue ? 5 : 2;
 			case 0xD1:
-				throw new NotImplementedException();
+				//NOTE(Simon): POP DE
+				DE = PopStack();
+				return 3;
 			case 0xD2:
-				throw new NotImplementedException();
+				//NOTE(Simon): JP NC, nn
+				wasTrue = JumpConditional(GetFlagCarry(), 0);
+				return wasTrue ? 4 : 3;
 			case 0xD3:
 				//NOTE(Simon): No opcode
 				Console.WriteLine($"Encountered unknown opcode {opcode:X}");
@@ -1055,7 +1105,9 @@ public class Emulator
 			case 0xD4:
 				throw new NotImplementedException();
 			case 0xD5:
-				throw new NotImplementedException();
+				//NOTE(Simon): PUSH DE
+				PushStack(DE);
+				return 4;
 			case 0xD6:
 				throw new NotImplementedException();
 			case 0xD7:
@@ -1063,11 +1115,15 @@ public class Emulator
 				Restart(0x10);
 				return 4;
 			case 0xD8:
-				throw new NotImplementedException();
+				//NOTE(Simon): RET C
+				wasTrue = ReturnConditional(GetFlagCarry(), 1);
+				return wasTrue ? 5 : 2;
 			case 0xD9:
 				throw new NotImplementedException();
 			case 0xDA:
-				throw new NotImplementedException();
+				//NOTE(Simon): JP C, nn
+				wasTrue = JumpConditional(GetFlagCarry(), 1);
+				return wasTrue ? 4 : 3;
 			case 0xDB:
 				//NOTE(Simon): No opcode
 				Console.WriteLine($"Encountered unknown opcode {opcode:X}");
@@ -1084,15 +1140,19 @@ public class Emulator
 				//NOTE(Simon): RST, 18
 				Restart(0x18);
 				return 4;
+
 			#endregion
 
 			#region Ex
+
 			case 0xE0:
 				//NOTE(Simon): LDH (n), A
 				WriteToAddressPart(ReadImmediate8(), A);
 				return 3;
 			case 0xE1:
-				throw new NotImplementedException();
+				//NOTE(Simon): POP HL
+				HL = PopStack();
+				return 3;
 			case 0xE2:
 				//NOTE(Simon): LDH (C), A
 				WriteToAddressPart(C, A);
@@ -1106,7 +1166,9 @@ public class Emulator
 				Console.WriteLine($"Encountered unknown opcode {opcode:X}");
 				break;
 			case 0xE5:
-				throw new NotImplementedException();
+				//NOTE(Simon): PUSH HL
+				PushStack(HL);
+				return 4;
 			case 0xE6:
 				throw new NotImplementedException();
 			case 0xE7:
@@ -1141,15 +1203,19 @@ public class Emulator
 				//NOTE(Simon): RST, 28
 				Restart(0x28);
 				return 4;
+
 			#endregion
 
 			#region Fx
+
 			case 0xF0:
 				//NOTE(Simon): LDH A, (n)
 				A = LoadFromAddressPart();
 				return 2;
 			case 0xF1:
-				throw new NotImplementedException();
+				//NOTE(Simon): POP AF
+				AF = PopStack();
+				return 3;
 			case 0xF2:
 				throw new NotImplementedException();
 			case 0xF3:
@@ -1161,7 +1227,9 @@ public class Emulator
 				Console.WriteLine($"Encountered unknown opcode {opcode:X}");
 				break;
 			case 0xF5:
-				throw new NotImplementedException();
+				//NOTE(Simon): PUSH AF
+				PushStack(AF);
+				return 4;
 			case 0xF6:
 				throw new NotImplementedException();
 			case 0xF7:
@@ -1198,6 +1266,7 @@ public class Emulator
 				//NOTE(Simon): RST, 38
 				Restart(0x38);
 				return 4;
+
 			#endregion
 
 			default:
@@ -1537,6 +1606,43 @@ public class Emulator
 	{
 		short offset = ReadImmediate8Signed();
 		PC = (ushort)(PC + offset);
+	}
+
+	private bool JumpConditional(byte value, byte testValue)
+	{
+		ushort address = ReadImmediate16();
+
+		if (value == testValue)
+		{
+			JumpAddress(address);
+			return true;
+		}
+
+		return false;
+	}
+
+	private bool ReturnConditional(byte value, byte testValue)
+	{
+		if (value == testValue)
+		{
+			Return();
+			return true;
+		}
+
+		return false;
+	}
+
+	private void Return()
+	{
+		PC = ReadMemory16(StackPointer);
+		StackPointer += 2;
+	}
+
+	private ushort PopStack()
+	{
+		ushort value = ReadMemory16(StackPointer);
+		StackPointer += 2;
+		return value;
 	}
 
 	private void ComplementAccumulator()
